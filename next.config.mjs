@@ -1,14 +1,12 @@
 /** @type {import('next').NextConfig} */
 const isProd = process.env.NODE_ENV === 'production';
-
 const nextConfig = {
   output: "export",
   basePath: isProd ? "/Local-Wave-" : "",
-  assetPrefix: isProd ? "/Local-Wave-/" : "", // Ditambah / di akhir khusus untuk aset CSS/JS
+  assetPrefix: isProd ? "/Local-Wave-" : "",
   trailingSlash: true,
   images: {
-    unoptimized: true
-  }
+    unoptimized: true,
+  },
 };
-
 export default nextConfig;
