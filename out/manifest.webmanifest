@@ -1,0 +1,20 @@
+{
+  "name": "LocalWave",
+  "short_name": "LocalWave",
+  "description": "Offline music library for local audio files, playlists, and metadata.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f3ee",
+  "theme_color": "#23211d",
+  "categories": ["music", "entertainment", "utilities"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
