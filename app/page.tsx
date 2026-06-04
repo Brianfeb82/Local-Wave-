@@ -134,6 +134,7 @@ const addLog = (msg: string) => setDebugLog(prev => [...prev, `${new Date().toLo
 
   async function loadLibrary() {
   try {
+    addLog(`Origin: ${window.location.origin} | Path: ${window.location.pathname}`);
     addLog("Opening IndexedDB...");
     const storedTracks = await getAllTracks();
     addLog(`Found ${storedTracks.length} tracks in DB`);
