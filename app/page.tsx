@@ -80,8 +80,6 @@ export default function Home() {
   const [importing, setImporting] = useState(false);
   const [status, setStatus] = useState("Import folder musik lokal untuk mulai.");
   const [newPlaylistName, setNewPlaylistName] = useState("");
-  const [debugLog, setDebugLog] = useState<string[]>([]);
-const addLog = (msg: string) => setDebugLog(prev => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
 
   const currentTrack = tracks.find((track) => track.id === currentTrackId) || null;
   const genres = useMemo(
@@ -133,27 +131,13 @@ const addLog = (msg: string) => setDebugLog(prev => [...prev, `${new Date().toLo
   }, [volume]);
 
   async function loadLibrary() {
-  try {
-    addLog(`Origin: ${window.location.origin} | Path: ${window.location.pathname}`);
-    addLog("Opening IndexedDB...");
-    const storedTracks = await getAllTracks();
-    addLog(`Found ${storedTracks.length} tracks in DB`);
-    
-    if (storedTracks.length > 0) {
-      addLog(`First track: ${storedTracks[0].fileName}, blob size: ${storedTracks[0].blob?.size ?? "NO BLOB"}`);
-    }
-    
-    const upgradedTracks = await Promise.all(storedTracks.map(upgradeStoredTrackMetadata));
-    setTracks(upgradedTracks.map((storedTrack) => stripBlob(storedTrack)));
-    if (storedTracks.length) {
-      setStatus(`${storedTracks.length} lagu siap diputar offline.`);
-    }
-    addLog("loadLibrary done!");
-  } catch (err) {
-    addLog(`ERROR in loadLibrary: ${String(err)}`);
+  const storedTracks = await getAllTracks();
+  const upgradedTracks = await Promise.all(storedTracks.map(upgradeStoredTrackMetadata));
+  setTracks(upgradedTracks.map((storedTrack) => stripBlob(storedTrack)));
+  if (storedTracks.length) {
+    setStatus(`${storedTracks.length} lagu siap diputar offline.`);
   }
 }
-
   async function importFiles(fileList: FileList | null) {
     if (!fileList?.length) return;
 
@@ -216,27 +200,20 @@ const addLog = (msg: string) => setDebugLog(prev => [...prev, `${new Date().toLo
     );
   }
 
-  async function playTrack(trackId: string) {
-  try {
-    addLog(`playTrack called: ${trackId}`);
-    const stored = await getTrack(trackId);
-    addLog(`getTrack result: ${stored ? `found, blob size: ${stored.blob?.size ?? "NO BLOB"}` : "NULL"}`);
-    if (!stored) return;
+ async function playTrack(trackId: string) {
+  const stored = await getTrack(trackId);
+  if (!stored) return;
 
-    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-    const url = URL.createObjectURL(stored.blob);
-    urlRef.current = url;
-    setCurrentTrackId(trackId);
-    setProgress(0);
+  if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+  const url = URL.createObjectURL(stored.blob);
+  urlRef.current = url;
+  setCurrentTrackId(trackId);
+  setProgress(0);
 
-    if (audioRef.current) {
-      audioRef.current.src = url;
-      await audioRef.current.play();
-      setIsPlaying(true);
-      addLog("Playback started!");
-    }
-  } catch (err) {
-    addLog(`ERROR in playTrack: ${String(err)}`);
+  if (audioRef.current) {
+    audioRef.current.src = url;
+    await audioRef.current.play();
+    setIsPlaying(true);
   }
 }
 
@@ -632,18 +609,7 @@ const addLog = (msg: string) => setDebugLog(prev => [...prev, `${new Date().toLo
         onPause={() => setIsPlaying(false)}
         onPlay={() => setIsPlaying(true)}
       />
-      {debugLog.length > 0 && (
-  <div className="fixed top-0 left-0 right-0 z-50 max-h-64 overflow-y-auto bg-black/90 p-3 text-xs text-green-400 font-mono">
-    <button 
-      onClick={() => setDebugLog([])} 
-      className="mb-2 rounded bg-red-600 px-2 py-1 text-white text-xs"
-    >
-      Clear Log
-    </button>
-    {debugLog.map((log, i) => <div key={i}>{log}</div>)}
-  </div>
-)}
-    </main>
+ </main>
   );
 }
 
