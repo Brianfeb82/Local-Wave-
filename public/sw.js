@@ -1,4 +1,4 @@
-const CACHE_NAME = "localwave-app-v3";
+const CACHE_NAME = "localwave-app-v4";
 const SCOPE_PATH = "/Local-Wave-";
 
 // App shell files yang pasti dibutuhkan
@@ -47,17 +47,23 @@ self.addEventListener("fetch", (event) => {
   // Abaikan request ke luar origin
   if (url.origin !== self.location.origin) return;
 
-  // Navigasi (HTML): Network first, fallback ke cache
+  // Navigasi (HTML): stale-while-revalidate — serve cache dulu, refresh di background
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          // Simpan ke cache saat berhasil fetch
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          return response;
+      Promise.resolve()
+        .then(() => caches.match(event.request))
+        .then((cached) => {
+          const fetchPromise = fetch(event.request)
+            .then((response) => {
+              if (!response || response.status !== 200) return response;
+              const clone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+              return response;
+            })
+            .catch(() => undefined);
+          return cached || fetchPromise;
         })
-        .catch(() => caches.match(`${SCOPE_PATH}/`))
+        .then((response) => response || caches.match(`${SCOPE_PATH}/`))
     );
     return;
   }
