@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const basePath = process.env.NODE_ENV === "production" ? "/Local-Wave-" : "";
 
 export default function ServiceWorkerRegistration() {
   useEffect(() => {
