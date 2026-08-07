@@ -1,4 +1,4 @@
-const CACHE_NAME = "localwave-app-v2";
+const CACHE_NAME = "localwave-app-v3";
 const SCOPE_PATH = "/Local-Wave-";
 
 // App shell files yang pasti dibutuhkan
@@ -41,11 +41,11 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
+  // Abaikan blob/data/extensions (mis. audio dari IndexedDB) — biarkan browser menanganinya
+  if (url.protocol !== "http:" && url.protocol !== "https:") return;
+
   // Abaikan request ke luar origin
   if (url.origin !== self.location.origin) return;
-
-  // Abaikan Chrome extensions
-  if (url.protocol === "chrome-extension:") return;
 
   // Navigasi (HTML): Network first, fallback ke cache
   if (event.request.mode === "navigate") {
