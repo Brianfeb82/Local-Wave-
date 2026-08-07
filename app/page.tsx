@@ -212,8 +212,13 @@ export default function Home() {
 
   if (audioRef.current) {
     audioRef.current.src = url;
-    await audioRef.current.play();
-    setIsPlaying(true);
+    try {
+      await audioRef.current.play();
+      setIsPlaying(true);
+      setStatus("");
+    } catch (error) {
+      setStatus(`Playback error: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 }
 
@@ -604,6 +609,10 @@ export default function Home() {
 
       <audio
         ref={audioRef}
+        playsInline
+        onError={({ currentTarget }) => {
+          setStatus(`Audio error: ${currentTarget.error?.code ?? "unknown"} ${currentTarget.error?.message ?? ""}`);
+        }}
         onTimeUpdate={(event) => setProgress(event.currentTarget.currentTime)}
         onEnded={() => playRelative(1)}
         onPause={() => setIsPlaying(false)}
